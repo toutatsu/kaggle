@@ -18,9 +18,9 @@ def data_load():
     return digit_data,label,digit_test
 
 #https://stackoverflow.com/questions/37228371/visualize-mnist-dataset-using-opencv-or-matplotlib-pyplot
-def digit_visualize(digit_data,label=None):
+def digit_visualize(digit_data,height=28,width=28,label=None):
     plt.title('digit:{}'.format(label))
-    plt.imshow(np.array(digit_data, dtype='uint8').reshape((28, 28)), cmap='gray')
+    plt.imshow(np.array(digit_data, dtype='uint8').reshape((height, width)), cmap='gray')
     plt.show()
 
 def write_prediction(file_name,predictions):
@@ -29,3 +29,12 @@ def write_prediction(file_name,predictions):
         for i in range(0,test_num):
             print("{}".format(i),flush=True)
             f.write("{},{}\n".format(i+1,predictions[i]))
+
+def visualize_2d(data,label,plot_name="digit",num=1000):
+    digit_color= {0:"black",1:"red",2:"orange",3:"gold",4:"lime",5:"blue",6:"green",7:"cyan",8:"blue",9:"magenta"}
+    plt.title(plot_name)
+    for i in range(0,num):
+        print(i)
+        print(label[i])
+        plt.scatter(data[i,0],data[i,1],color=digit_color[label[i]],marker="$"+str(label[i])+"$")
+    plt.show()

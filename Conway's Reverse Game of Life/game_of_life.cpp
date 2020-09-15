@@ -3,7 +3,6 @@
 #include<vector>
 #include"visualize.h"
 
-#include"debug.h"
 using namespace std;
 using namespace vis;
 
@@ -37,7 +36,8 @@ vector<vector<int>> next_generation(vector<vector<int>>life,int H,int W){
             int alive_cnt=0;
             for(int k=0;k<8;k++){
                 int h=i+d8[k],w=j+d8[k+2];
-                if(!(0<=h&&h<H&&0<=w&&w<W))continue;
+                //if(!(0<=h&&h<H&&0<=w&&w<W))continue;
+                h=(h+H)%H;w=(w+W)%W;
                 alive_cnt+=(life[h][w]==alive);
             }
             switch (life[i][j]){

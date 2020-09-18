@@ -38,9 +38,35 @@ template<class Genotype>class Genetic_Algorithm{
 
     int fitness(Genotype individual){
         ////////////////////
+        int dna_[2][25][25];
+        for(int i=0;i<25*25;i++)dna_[0][i/25][i%25]=individual.dna[i/25][i%25];
+
+        const int alive=1,dead=0;
+        int d8[10]={1,1,1,0,-1,-1,-1,0,1,1};//0-7 2-9
+
+        for(int step=0;step<ideal.fitness;step++){
+            for(int i=0;i<25;i++){
+                for(int j=0;j<25;j++){
+                    int alive_cnt=0;
+                    for(int k=0;k<8;k++){
+                        int h=i+d8[k],w=j+d8[k+2];
+                        //if(!(0<=h&&h<H&&0<=w&&w<W))continue;
+                        h=(h+25)%25;w=(w+25)%25;
+                        alive_cnt+=(dna_[step%2][h][w]==alive);
+                    }
+                    switch(dna_[step%2][i][j]){
+                        case alive:dna_[!(step%2)][i][j]=((alive_cnt==2||alive_cnt==3)?alive:dead);break;
+                        case dead:dna_[!(step%2)][i][j]=(alive_cnt==3?alive:dead);break;
+                    }
+                }
+            }
+        }
+
+
+
         int cnt=0;
         for(int i=0;i<25*25;i++){
-            cnt+=(individual.dna[i/25][i%25]!=ideal.dna[i/25][i%25]);
+            cnt+=(dna_[ideal.fitness%2][i/25][i%25]!=ideal.dna[i/25][i%25]);
         }
         return cnt;
         ////////////////////
@@ -64,6 +90,10 @@ template<class Genotype>class Genetic_Algorithm{
                 x.dna[i/25][i%25]=(rand_int(mt)>50?1:0);
             }
         }
+        for(int i=0;i<25*25;i++){
+            individuals[0][0].dna[i/25][i%25]=0;
+        }
+        
         evaluation();
         ////////////////////
         return;
@@ -74,10 +104,16 @@ template<class Genotype>class Genetic_Algorithm{
         std::uniform_int_distribution<> rand_int(0,20);//integer [L,R]
 
         ////////////////
-        // #define CROSSOVER_RATE 0.8 //交叉の確率
+
+        #define CROSSOVER_RATE 0.8 //交叉の確率
         for(int i=0;i<25*25;i++){
             child.dna[i/25][i%25]=(rand_int(mt)>50?a.dna[i/25][i%25]:b.dna[i/25][i%25]);
         }
+
+        // for(int i=0;i<25*25;i++){
+        //     child.dna[i/25][i%25]=(i<(25*25)/2?a.dna[i/25][i%25]:b.dna[i/25][i%25]);
+        // }
+
         ////////////////
         return child;
     }
@@ -87,7 +123,7 @@ template<class Genotype>class Genetic_Algorithm{
         std::uniform_int_distribution<> rand_int(0,100);//integer [L,R]
         ////////////////
         for(int i=0;i<25*25;i++){
-            g.dna[i/25][i%25]^=(rand_int(mt)<mutation_rate);
+            g.dna[i/25][i%25]^=(rand_int(mt)<mutation_rate?ideal.dna[i/25][i%25]:!ideal.dna[i/25][i%25]);
         }
         ////////////////
         return;
@@ -102,7 +138,7 @@ template<class Genotype>class Genetic_Algorithm{
         for(;No<elite_reproduction;No++){
             individuals[next][No]=individuals[current][No];
         }
-        //突然変異を加えるエリート
+        // //突然変異を加えるエリート
         for(;No<elite_reproduction*2;No++){
             individuals[next][No]=individuals[current][No-elite_reproduction];
         }
@@ -122,13 +158,15 @@ template<class Genotype>class Genetic_Algorithm{
     }
 
     Genotype run(int Seed,int max_generation){
-        initialize(Seed);
+        //initialize(Seed);
 
         for(generation=0;generation<max_generation;){
             printf("\033[%d;%dH",(30)+1,(0)*2+1);
             cout<<individuals[generation%2][0].fitness<<endl;
             next_generation();
-            //if(individuals[generation%2][0].fitness<50)break;
+            //for(int i=0;i<population_size;i++)cout<<individuals[generation%2][i].fitness<<" \n"[i==population_size-1];
+            if(individuals[generation%2][0].fitness==0){cout<<"ok"<<endl;break;}
+           //if(generation>max_generation&&individuals[generation%2][0].fitness<20)break;
         }
         return individuals[generation%2][0];
     }
@@ -154,34 +192,59 @@ void printlife(GENE life,int H,int W,int h,int w){
 }
 
 int main(int argc,char** argv){
-    ifstream in("train.csv");
-    cin.rdbuf(in.rdbuf());
+
     string str;
-    getline(cin, str);
+    ifstream test("test.csv");
+    getline(test, str);
+    ifstream sample("sample_submission.csv");
+    getline(sample, str);
+
+    if(!test){
+        cerr << "Error: test file not opened." << endl;
+        return 1;
+    }
+    if(!sample){
+        cerr << "Error: sample file not opened." << endl;
+        return 1;
+    }
+
+    ofstream out("submission.csv", ios::out);
+    out<<"id,";
+    for(int i=0;i<25*25;i++)out<<"start_"<<i<<",\n"[i+1==25*25];
 
     for(int No=0;No<50000;No++){
-        getline(cin, str);
+        getline(test, str);
         replace(str.begin(), str.end(), ',', ' ');
         stringstream buf(str);
-        int id,delta;
-        buf>>id>>delta;
-        cout<<"id:"<<id<<endl;
-        cout<<"delta:"<<delta<<endl;
+        int id,delta;buf>>id>>delta;
+        //cout<<"id:"<<id<<endl<<"delta:"<<delta<<endl;
 
         Genetic_Algorithm<GENE>GA(20);
+        GA.ideal.fitness=delta;
 
         for(int i=0;i<25*25;i++)buf>>GA.ideal.dna[i/25][i%25];
 
-        GA.ideal.fitness=delta;
+        GA.initialize(0);
+        getline(sample, str);
+        replace(str.begin(), str.end(), ',', ' ');
+        stringstream buf2(str);
+        buf2>>id;
 
-    
-        printlife(GA.ideal,25,25,0,30);
-        cout<<id<<endl;
+        for(int i=0;i<25*25;i++)buf2>>GA.individuals[0][0].dna[i/25][i%25];
 
+        GA.run(0,200);
 
-        GA.run(1/*atoi(argv[1])*/,100000);
-        printf("\033[2J");
-        printlife(GA[0],25,25,0,0);
+        cout<<id<<" "<<delta<<" "<<GA[0].fitness<<endl;
+
+        out<<id<<",";
+        for(int i=0;i<25*25;i++)out<<GA[0].dna[i/25][i%25]<<",\n"[i+1==25*25];
+
+        // printlife(GA.ideal,25,25,0,30);
+
+        // printf("\033[2J");
+        // printlife(GA[0],25,25,0,0);
+        // printf("%d\n",GA[0].fitness);
+        //return 0;
     }
     return 0;
 }

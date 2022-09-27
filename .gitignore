@@ -1,3 +1,11 @@
 *.csv
 *.tsv
 .DS_store
+
+data
+output
+submissions
+__pycache__
+*.pyc
+*.bin
+

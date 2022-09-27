@@ -1,0 +1,37 @@
+# version: '3.9'
+
+services:
+
+    feedback-prize:
+        image: feedback-prize
+        build:
+            context: .
+            dockerfile: Dockerfile
+            
+        container_name: feedback-prize_container
+        hostname: feedback-prize_container_host
+
+        working_dir: '/root/workspace/'
+
+        shm_size: '6gb'
+
+        stdin_open: true
+        tty: true
+
+        # expose:
+        #     - 10009
+        ports:
+            -   "10010:10010"
+
+        volumes:
+            -   type: bind
+                source: .
+                target: /root/workspace/
+
+        # deploy:
+        #     resources:
+        #         reservations:
+        #             devices:
+        #             -   driver: nvidia
+        #                 device_ids: ['1','2']
+        #                 capabilities: [gpu]

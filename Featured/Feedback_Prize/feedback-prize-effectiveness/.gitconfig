@@ -1,0 +1,11 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = toutatsu #Tatsuya Toma
+	email = toutatsu.00223+git@gmail.com
+[init]
+	defaultBranch = main
+[alias]
+	loggraph = log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+[credential]
+	helper = "!f() { /root/.vscode-server/bin/6d9b74a70ca9c7733b29f0456fd8195364076dda/node /tmp/vscode-remote-containers-f1981200c1783942914e297394afdfb8fc946b47.js $*; }; f"

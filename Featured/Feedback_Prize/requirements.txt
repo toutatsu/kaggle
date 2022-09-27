@@ -1,0 +1,56 @@
+# defaul libraries      # https://docs.python.org/ja/
+# import os
+# import sys
+# import io
+# import math
+# import random
+# import pprint
+# import time
+# import datetime
+# import typing
+# import json
+# import glob
+# import requests
+# import warnings
+# import gc
+# import pprint
+# import re
+
+
+numpy as np    # https://numpy.org/
+pandas as pd   # https://pandas.pydata.org/
+sklearn        # https://scikit-learn.org/stable/
+# import scipy          # https://scipy.org/
+
+
+matplotlib     # https://matplotlib.org/stable/index.html
+# import seaborn        # https://seaborn.pydata.org/index.html
+# import plolty         # https://plotly.com/python/
+
+
+# import tensorflow     # https://www.tensorflow.org/
+torch          # https://pytorch.org/
+transformers   # https://huggingface.co/transformers/
+
+
+# import cv2            # https://opencv.org/
+# import torchvision    # https://pytorch.org/vision/stable/index.html
+
+
+# import nltk           # https://www.nltk.org/
+spacy          # https://spacy.io/
+# import torchtext      # https://pytorch.org/text/stable/index.html
+
+
+# import beautifulsoup  # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+# import scrapy         # https://scrapy.org/
+# import selenium       # https://www.selenium.dev/
+
+
+# import pytest         # https://docs.pytest.org/
+# import sympy          # https://www.sympy.org/en/index.html
+# import tqdm           # https://tqdm.github.io/
+# import flake8         # https://flake8.pycqa.org/
+jupyter        # https://docs.jupyter.org/
+# ipywidgets
+kaggle         # https://github.com/Kaggle/kaggle-api

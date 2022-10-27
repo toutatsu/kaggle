@@ -1,3 +1,11 @@
+"""Feedback Prize デモ用関数
+
+gradio による Feedback Prize のデモ feedback-prize_model_demo.py で利用する関数
+
+"""
+
+from ast import arg
+import sys
 import re
 import os
 import pathlib
@@ -7,17 +15,29 @@ import pandas as pd
 import spacy
 from spacy import displacy
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 
+sys.path.append('../')
+
+
+from feedback_prize_2021.src.models.huggingface_transformers import BERT
+
+
 class CFG():
     """設定"""
-    data_path="./feedback-prize-2021/data/feedback-prize-2021/"
+    data_path="../feedback_prize_2021/data/feedback-prize-2021/"
+    device='cpu'
 
 train=pd.read_csv(os.path.join(CFG.data_path,"train.csv"),index_col='id')
 
+
+models={
+    "BERT":None,
+    "RoBERTa":None,
+    "DeBERTa":None,
+}
 # from spacy.tokens import Span
 
 nlp = spacy.blank("en")
@@ -43,18 +63,20 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
     Returns:
         result (str,str): text, annotation
     """
-    # print(text)
 
+    # 解析対象の文章
     text='select input type'
 
+    # 対象の文章をデータから持ってくる
     if input_type=='use data':
         text=pathlib.Path(
                 os.path.join(CFG.data_path,'train',essay_id+'.txt')
             ).read_text(encoding='utf-8')
-
+    # 対象の文章を直接入力
     if input_type=='write':
         text=essay
 
+    # ラベルをアノテーション情報から決定
     if annotation_type=='groundtruth':
         ents = []
         for _, row in train[train.index== essay_id].iterrows():
@@ -72,50 +94,85 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
 
         return ents
 
+    # ラベルをアノテーション情報をモデルで推定
     if annotation_type=='prediction':
-
-        def predict(text,model_name):
-
-            a=[]
-
-            sentences=re.split('[\n.,]',text)
-
-            for sentence in sentences:
-
-                pass
-                # pre=BERT.forward(sentence)
-
-                # a.append(pre)
-
-            return
-
 
         if model_name=='BERT':
 
+            if models['BERT']==None:
+                print("setting BERT model...")
+                models['BERT']=BERT.transformers_BERT(pretrained_path='bert-base-uncased',device=CFG.device)
 
-            pass
-
-        color_map={
-            'Lead': '#8000ff',
-            'Position': '#2b7ff6',
-            'Evidence': '#2adddd',
-            'Claim': '#80ffb4',
-            'Concluding Statement': 'd4dd80',
-            'Counterclaim': '#ff8042',
-            'Rebuttal': '#ff0000'
-        }
+            text_with_annotation=element_predict(text,models['BERT'])
         
-        # print("text:"+text)
-        # print(re.split('\n',text))
-        segments=re.split('[\n.,]',text)
-        if "" in segments:
-            segments.remove('')
+        # if model_name=='RoBERTa':
 
-        print(segments)
+        #     if models['RoBERTa']==None:
+        #         print("setting RoBERTa model...")
+        #         models['RoBERTa']=BERT.transformers_RoBERTa(pretrained_path='bert-base-uncased',device=CFG.device)
 
-        return [
-            (word, list(color_map.keys())[len(word)%len(color_map)]) for word in segments
-        ]
+        #     text_with_annotation=element_predict(text,models['RoBERTa'])
+
+        if model_name=='DeBERTa':
+
+            text_with_annotation=[("DeBERTa","Claim")]
+
+
+        return text_with_annotation
+
+    if annotation_type=='none':
+        return re.split('[\n.]',text)
+
+
+
+            
+
+        # color_map={
+        #     'Lead': '#8000ff',
+        #     'Position': '#2b7ff6',
+        #     'Evidence': '#2adddd',
+        #     'Claim': '#80ffb4',
+        #     'Concluding Statement': 'd4dd80',
+        #     'Counterclaim': '#ff8042',
+        #     'Rebuttal': '#ff0000'
+        # }
+        
+        # # print("text:"+text)
+        # # print(re.split('\n',text))
+        # segments=re.split('[\n.,]',text)
+        # if "" in segments:
+        #     segments.remove('')
+
+        # print(segments)
+
+        # return [
+        #     (word, list(color_map.keys())[len(word)%len(color_map)]) for word in segments
+        # ]
+
+
+
+
+def element_predict(text,model):
+    """
+    text内文章のelementをmodelを使って推定
+    """
+    sentences_with_annotation=[]
+
+    sentences=re.split('[\n.]',text)
+
+    argument_elements=['Lead','Position','Evidence','Claim', 'Concluding Statement', 'Counterclaim', 'Rebuttal']
+
+    for sentence in sentences:
+
+        inputs=model.tokenizer(sentence, return_tensors="pt")
+
+        pred=model.model.forward(**inputs).logits.detach().numpy().argmax()
+        # pre=model.forward(sentence)
+
+        sentences_with_annotation.append((sentence,argument_elements[pred]))
+
+    return sentences_with_annotation
+
 
 
 def effectiveness_demo(input_type,essay,essay_id,annotation_type,model_name):

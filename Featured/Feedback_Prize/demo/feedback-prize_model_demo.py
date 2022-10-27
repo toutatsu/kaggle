@@ -1,9 +1,16 @@
-"""Feedback Prize gradio demo"""
+# -*- coding: utf-8 -*-
+"""Feedback Prize デモ
+
+gradio による Feedback Prize のデモ
+
+"""
 
 import gradio as gr
 
-from demo_fn import element_demo,effectiveness_demo,learning_demo,train
+from demo_fn import element_demo, effectiveness_demo, learning_demo, train
 
+
+# Feedback Prize 2021のデモ
 element=gr.Interface(
 
     fn=element_demo,
@@ -57,9 +64,7 @@ element=gr.Interface(
 )
 
 
-
 # feedback-prize-effectivenessのデモ
-
 effectiveness=gr.Interface(
     fn=effectiveness_demo,
     inputs=[
@@ -94,6 +99,7 @@ effectiveness=gr.Interface(
     # examples=['The quick brown fox jumped over the lazy dogs.'],
 )
 
+
 # feedback-prize-english-language-learningのデモ
 learning=gr.Interface(
     fn=learning_demo,
@@ -124,12 +130,12 @@ learning=gr.Interface(
 ) 
 
 
-
 demo = gr.TabbedInterface(
     [element, effectiveness, learning],
     ["element", "effectiveness", "learning"],
     # css="#element_result span {white-space: pre}"
 )
+
 
 if __name__ == "__main__":
     demo.launch(server_port=10010)

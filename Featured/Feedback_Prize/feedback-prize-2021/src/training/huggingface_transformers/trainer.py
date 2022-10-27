@@ -17,7 +17,8 @@ def score(preds):
         'log loss': log_loss(
             preds.label_ids,
             torch.nn.functional.softmax(
-                torch.Tensor(preds.predictions)
+                torch.Tensor(preds.predictions),
+                dim=0
             )
         )
     }

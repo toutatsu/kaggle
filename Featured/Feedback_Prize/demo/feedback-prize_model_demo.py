@@ -138,5 +138,9 @@ demo = gr.TabbedInterface(
 
 
 if __name__ == "__main__":
-    demo.launch(server_port=10010)
+
+    try:
+        demo.launch(server_port=10010)
+    except KeyboardInterrupt:
+        demo.close()
     demo.close()

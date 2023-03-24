@@ -169,7 +169,7 @@ def element_predict(text,model):
         pred=model.model.forward(**inputs).logits.detach().numpy().argmax()
         # pre=model.forward(sentence)
 
-        sentences_with_annotation.append((sentence,argument_elements[pred]))
+        sentences_with_annotation.append((sentence,argument_elements[0]))
 
     return sentences_with_annotation
 

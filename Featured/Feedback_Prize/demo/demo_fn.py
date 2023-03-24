@@ -65,6 +65,8 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
     """
 
     # 解析対象の文章
+    
+    
     text='select input type'
 
     # 対象の文章をデータから持ってくる
@@ -77,7 +79,7 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
         text=essay
 
     # ラベルをアノテーション情報から決定
-    if annotation_type=='groundtruth':
+    if input_type=='use data' and annotation_type=='groundtruth':
         ents = []
         for _, row in train[train.index== essay_id].iterrows():
             ents.append(
@@ -94,6 +96,8 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
 
         return ents
 
+    
+
     # ラベルをアノテーション情報をモデルで推定
     if annotation_type=='prediction':
 
@@ -101,10 +105,11 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
 
             if models['BERT']==None:
                 print("setting BERT model...")
-                models['BERT']=BERT.transformers_BERT(pretrained_path='bert-base-uncased',device=CFG.device)
+                # models['BERT']=BERT.transformers_BERT(pretrained_path='bert-base-uncased',device=CFG.device)
+                models['BERT']=BERT.transformers_BERT(pretrained_path='../feedback_prize_2021/output/BERT/checkpoint-2160',device=CFG.device)
 
             text_with_annotation=element_predict(text,models['BERT'])
-        
+
         # if model_name=='RoBERTa':
 
         #     if models['RoBERTa']==None:
@@ -117,7 +122,7 @@ def element_demo(input_type,essay,essay_id,annotation_type,model_name):
 
             text_with_annotation=[("DeBERTa","Claim")]
 
-
+        print(text_with_annotation)
         return text_with_annotation
 
     if annotation_type=='none':
@@ -168,6 +173,8 @@ def element_predict(text,model):
 
         pred=model.model.forward(**inputs).logits.detach().numpy().argmax()
         # pre=model.forward(sentence)
+
+        # pred=np.random.randint(0,7)
 
         sentences_with_annotation.append((sentence,argument_elements[0]))
 
